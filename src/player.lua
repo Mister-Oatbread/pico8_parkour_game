@@ -9,9 +9,8 @@ function new_character(type, color, tracked_character)
     local gravity = 200
 
     local is_shadow = type == "shadow"
-    local action_queue = new_action_queue(3)
+    local action_queue = new_action_queue(10, pos)
     local in_flight = false
-    local tracked_character = tracked_character
 
     local color_value
     if color == "orange" then
@@ -96,13 +95,13 @@ function new_character(type, color, tracked_character)
     -- draw player, and color the shirt
     local function draw()
         local sprite = buttons.jump and 17 or 1
-        pal(9, color_value)
+        pal(8, color_value)
         spr(sprite, round(pos.x), round(pos.y))
         pal()
     end
 
     return {
-        get_position=function() return pos end,
+        get_position=function() return {x=pos.x, y=pos.y} end,
         update=update,
         draw=draw,
     }
