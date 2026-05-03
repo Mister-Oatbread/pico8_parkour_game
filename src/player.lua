@@ -8,20 +8,25 @@ function new_character(type, color, tracked_character)
 
     local gravity = 200
 
+    local sprite_info = {
+        sprite=1,
+        x=pos.x,
+        y=pos.y,
+        x_flip=false,
+        y_flip=false,
+    }
+
     local is_shadow = type == "shadow"
-    local action_queue = new_action_queue(10, pos)
+    local action_queue = new_action_queue(10, sprite_info)
     local in_flight = false
 
-    local color_value
-    if color == "orange" then
-        color_value = 9
-    elseif color == "yellow" then
-        color_value = 10
-    elseif color == "green" then
-        color_value = 11
-    else
-        color_value = 8
-    end
+    local colors = {
+        ["orange"]=9,
+        ["yellow"]=10,
+        ["green"]=11,
+        ["red"]=8,
+    }
+    local color_value = colors[color]
 
     local buttons = {
         up=false,
@@ -77,9 +82,32 @@ function new_character(type, color, tracked_character)
         if pos.y == 120 and acc.y >= 0 then vel.y = 0 end
     end
 
+    -- shadow only
+    -- fetches next action from action queue and writes it to sprite info
     local function follow()
-        action_queue.queue_new_action(tracked_character.get_position())
-        pos = action_queue.get_next_action()
+        action_queue.queue_new_action(tracked_character.get_sprite_info())
+        sprite_info = action_queue.get_next_action()
+    end
+
+    -- takes information on how sprite should be displayed and saves it
+    local function write_sprite_info()
+        local sprite = buttons.jump and 17 or 1
+        if not is_shadow then
+            sprite_info = {
+                sprite=sprite,
+                x=round(pos.x),
+                y=round(pos.y),
+                x_flip=false,
+                y_flip=false,
+            }
+        end
+    end
+
+    -- draw player, and color the shirt
+    local function draw_sprite()
+        pal(8, color_value)
+        spr(sprite_info.sprite, sprite_info.x, sprite_info.y, 1, 1, sprite_info.x_flip, sprite_info.y_flip)
+        pal()
     end
 
     local function update()
@@ -92,16 +120,15 @@ function new_character(type, color, tracked_character)
         end
     end
 
-    -- draw player, and color the shirt
     local function draw()
-        local sprite = buttons.jump and 17 or 1
-        pal(8, color_value)
-        spr(sprite, round(pos.x), round(pos.y))
-        pal()
+        if not is_shadow then
+            write_sprite_info()
+        end
+        draw_sprite()
     end
 
     return {
-        get_position=function() return {x=pos.x, y=pos.y} end,
+        get_sprite_info=function() return sprite_info end,
         update=update,
         draw=draw,
     }
