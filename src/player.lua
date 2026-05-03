@@ -7,6 +7,9 @@ function new_character(type, color, tracked_character)
     local acc = {x=0, y=0}
 
     local gravity = 200
+    local max_speed = 80
+
+    local frame = 0
 
     local sprite_info = {
         sprite=1,
@@ -15,9 +18,13 @@ function new_character(type, color, tracked_character)
         x_flip=false,
         y_flip=false,
     }
+    local facing_left = false
+    local facing_right = false
+    local hero_landing = false
+    local hero_landing_frames = 30
 
     local is_shadow = type == "shadow"
-    local action_queue = new_action_queue(10, sprite_info)
+    local action_queue = new_action_queue(16, sprite_info)
     local in_flight = false
 
     local colors = {
@@ -77,9 +84,31 @@ function new_character(type, color, tracked_character)
         vel.y += dt*acc.y
 
         -- limit x velocity and y position
-        vel.x = mid(-50, vel.x, 50)
+        vel.x = mid(-max_speed, vel.x, max_speed)
         pos.y = min(120, pos.y)
-        if pos.y == 120 and acc.y >= 0 then vel.y = 0 end
+
+        -- touchdown
+        if pos.y == 120 and acc.y >= 0 then
+
+            -- player was to fast, do hero landing
+            if vel.y > 30 then
+                vel.x = 0
+                hero_landing = true
+                hero_landing_frames = 0
+            end
+
+            vel.y = 0
+        end
+
+        if hero_landing_frames < 60 then
+            hero_landing_frames += 1
+            vel.x = 0
+        else
+            hero_landing = false
+        end
+    end
+
+    local function check_collision()
     end
 
     -- shadow only
@@ -91,22 +120,48 @@ function new_character(type, color, tracked_character)
 
     -- takes information on how sprite should be displayed and saves it
     local function write_sprite_info()
-        local sprite = buttons.jump and 17 or 1
-        if not is_shadow then
-            sprite_info = {
-                sprite=sprite,
-                x=round(pos.x),
-                y=round(pos.y),
-                x_flip=false,
-                y_flip=false,
-            }
+        local sprite = 1
+        local x_flip = false
+
+        -- walking
+        if not (vel.x == 0) then
+            frame = frame%20 + 1
+            sprite = 3
+            x_flip = vel.x > 0
+
+            -- running
+            if abs(vel.x) > (max_speed - 1) then
+                sprite = 5
+            end
+
+            -- walking animation
+            if frame>10 and not buttons.jump then sprite += 1 end
         end
+
+        if buttons.jump then sprite += 16 end
+
+        -- check for hero landing last
+        if hero_landing then sprite = 49 end
+        sprite_info = {
+            sprite=sprite,
+            x=round(pos.x),
+            y=round(pos.y),
+            x_flip=x_flip,
+            y_flip=false,
+        }
     end
 
     -- draw player, and color the shirt
     local function draw_sprite()
         pal(8, color_value)
-        spr(sprite_info.sprite, sprite_info.x, sprite_info.y, 1, 1, sprite_info.x_flip, sprite_info.y_flip)
+        if is_shadow then pal(15, 13) end
+        spr(sprite_info.sprite,
+            sprite_info.x,
+            sprite_info.y,
+            1,
+            1,
+            sprite_info.x_flip,
+            sprite_info.y_flip)
         pal()
     end
 

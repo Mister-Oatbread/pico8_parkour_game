@@ -18,6 +18,7 @@ end
 
 function _draw()
     cls()
+    map()
     shadow_3.draw()
     shadow_2.draw()
     shadow_1.draw()
