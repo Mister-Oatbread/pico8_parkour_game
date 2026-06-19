@@ -2,7 +2,7 @@
 
 -- file containing player stuff
 function new_character(type, color, tracked_character)
-    local pos = {x=60, y=120}
+    local pos = {x=60, y=248}
     local vel = {x=0, y=0}
     local acc = {x=0, y=0}
 
@@ -64,13 +64,14 @@ function new_character(type, color, tracked_character)
             elseif buttons.right then
                 acc.x = 100
             else
-                acc.x = -8*vel.x
+                vel.x = 0
+                acc.x = 0
             end
         else
             acc.x = -3*vel.x
         end
 
-        on_ground = pos.y==120
+        on_ground = pos.y==248
 
         -- initial jump, followed by "gliding upward", depending if jump button
         -- is still pressed
@@ -79,7 +80,8 @@ function new_character(type, color, tracked_character)
             if on_ground then
                 acc.y = -10*gravity
             else
-                acc.y = .3*gravity
+                -- acc.y = -.3*gravity
+                acc.y = -gravity
             end
         end
     end
@@ -94,12 +96,10 @@ function new_character(type, color, tracked_character)
 
         -- limit x velocity and y position
         vel.x = mid(-max_speed, vel.x, max_speed)
-        pos.y = min(120, pos.y)
-
-        if abs(vel.x) < 1 then vel.x=0 end
+        pos.y = min(248, pos.y)
 
         -- touchdown
-        if pos.y >= 120 and acc.y >= 0 then
+        if pos.y >= 248 and acc.y >= 0 then
 
             -- player was to fast, do hero landing
             if vel.y > 100 then
@@ -112,7 +112,7 @@ function new_character(type, color, tracked_character)
                 end
             end
 
-            pos.y = 120
+            pos.y = 248
             vel.y = 0
             acc.y = 0
         end
@@ -142,7 +142,7 @@ function new_character(type, color, tracked_character)
     -- takes information on how sprite should be displayed and saves it
     local function write_sprite_info()
         local sprite = 1
-        local x_flip = false
+        local x_flip
 
         -- walking
         if not (vel.x == 0) then
@@ -208,6 +208,8 @@ function new_character(type, color, tracked_character)
         get_sprite_info=function() return sprite_info end,
         update=update,
         draw=draw,
+        x=function() return pos.x end,
+        y=function() return pos.y end,
     }
 end
 
