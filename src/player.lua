@@ -21,7 +21,11 @@ function new_character(type, color, tracked_character)
     local facing_left = false
     local facing_right = false
     local hero_landing = false
+    local face_plant = false
     local hero_landing_frames = 30
+
+    local can_jump = true
+    local on_ground
 
     local is_shadow = type == "shadow"
     local action_queue = new_action_queue(16, sprite_info)
@@ -54,23 +58,28 @@ function new_character(type, color, tracked_character)
     -- take inputs and change player state based to reflect inputs
     local function process_inputs()
         -- accelerate to the left or the right
-        if buttons.left then
-            acc.x = -100
-        elseif buttons.right then
-            acc.x = 100
+        if not face_plant then
+            if buttons.left then
+                acc.x = -80
+            elseif buttons.right then
+                acc.x = 100
+            else
+                acc.x = -8*vel.x
+            end
         else
-            vel.x = 0
-            acc.x = 0
+            acc.x = -3*vel.x
         end
+
+        on_ground = pos.y==120
 
         -- initial jump, followed by "gliding upward", depending if jump button
         -- is still pressed
         acc.y = gravity
-        if buttons.jump then
-            if vel.y == 0 and acc.y == gravity then
-                acc.y = -30*gravity
+        if buttons.jump and can_jump then
+            if on_ground then
+                acc.y = -10*gravity
             else
-                acc.y = .5*gravity
+                acc.y = .3*gravity
             end
         end
     end
@@ -87,28 +96,40 @@ function new_character(type, color, tracked_character)
         vel.x = mid(-max_speed, vel.x, max_speed)
         pos.y = min(120, pos.y)
 
+        if abs(vel.x) < 1 then vel.x=0 end
+
         -- touchdown
-        if pos.y == 120 and acc.y >= 0 then
+        if pos.y >= 120 and acc.y >= 0 then
 
             -- player was to fast, do hero landing
-            if vel.y > 30 then
-                vel.x = 0
-                hero_landing = true
+            if vel.y > 100 then
                 hero_landing_frames = 0
+                if abs(vel.x) > (max_speed - 1) then
+                    face_plant = true
+                else
+                    hero_landing = true
+                    vel.x = 0
+                end
             end
 
+            pos.y = 120
             vel.y = 0
+            acc.y = 0
         end
 
         if hero_landing_frames < 60 then
+            if hero_landing then vel.x=0 end
             hero_landing_frames += 1
-            vel.x = 0
+            can_jump = false
         else
             hero_landing = false
+            face_plant = false
+            can_jump = true
         end
     end
 
     local function check_collision()
+
     end
 
     -- shadow only
@@ -138,10 +159,11 @@ function new_character(type, color, tracked_character)
             if frame>10 and not buttons.jump then sprite += 1 end
         end
 
-        if buttons.jump then sprite += 16 end
+        if not on_ground then sprite += 16 end
 
         -- check for hero landing last
         if hero_landing then sprite = 49 end
+        if face_plant then sprite = 50 end
         sprite_info = {
             sprite=sprite,
             x=round(pos.x),
