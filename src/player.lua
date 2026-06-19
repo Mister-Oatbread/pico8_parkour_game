@@ -177,7 +177,7 @@ function new_character(type, color, tracked_character)
     local function draw_sprite()
         pal(8, color_value)
         if is_shadow then pal(15, 13) end
-        spr(1,
+        spr(sprite_info.sprite,
             sprite_info.x,
             sprite_info.y,
             1,

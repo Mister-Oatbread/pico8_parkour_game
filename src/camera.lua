@@ -11,8 +11,8 @@ function new_camera(player)
     local player_focus_point = {x=0, y=0}
 
     local function update_player_focus_point()
-        player_focus_point.x = player.x()-56
-        player_focus_point.y = player.y()-56
+        player_focus_point.x = round(player.x())-56
+        player_focus_point.y = round(player.y())-56
     end
 
     local function get_position()
