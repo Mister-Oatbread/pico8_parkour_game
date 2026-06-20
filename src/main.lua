@@ -23,9 +23,9 @@ function _draw()
     cam_pos = player_camera.get_position()
     camera(cam_pos.x, cam_pos.y)
     map()
-    shadow_3.draw()
-    shadow_2.draw()
-    shadow_1.draw()
+    -- shadow_3.draw()
+    -- shadow_2.draw()
+    -- shadow_1.draw()
     player.draw()
 end
 
