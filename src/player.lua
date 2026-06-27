@@ -24,7 +24,7 @@ function new_character(type, color, tracked_character)
     local facing_right = false
     local hero_landing = false
     local face_plant = false
-    local hero_landing_frames = 30
+    local hero_landing_frames = 200
 
     local can_jump = true
     local on_ground
@@ -108,6 +108,7 @@ function new_character(type, color, tracked_character)
             -- player was to fast, do hero landing
             if vel.y > 200 then
                 player_camera.trigger_camera_shake("touchdown")
+                sfx(0)
                 hero_landing_frames = 0
                 if abs(vel.x) > (max_speed - 1) then
                     face_plant = true

@@ -20,7 +20,7 @@ function new_camera(player)
 	local function handle_camera_shake()
         if touchdown_shake then
             shake_frame+=1
-            local camera_shake_offsets={1,2,2,2,2,2,1};
+            local camera_shake_offsets={1,2,2,1,2,2,1};
             camera_position.y+=camera_shake_offsets[shake_frame]
            if shake_frame>6 then
                 shake_frame = 0

@@ -88,6 +88,7 @@ function new_player_animation()
                 head_sprite_choice=head_sprites.jumping_down_right[get_index_for_head(draw_info)]
             else
                 head_sprite_choice=head_sprites.walking[get_index_for_head(draw_info)]
+                if frame%15==0 then sfx(1) end
             end
             body_sprite_choice=body_sprites.walking[get_index_for_body(draw_info)]
         end
