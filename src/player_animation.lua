@@ -4,19 +4,21 @@ function new_player_animation()
 
     local x_flip = false
     local frame = 0
+    local lying_down = false
 
     local head_sprites = {
         standing = {198,199},
-        walking = {201,201},
-        jumping_up_right = {202,202},
-        jumping_down_right = {200,200},
-        jumping_up = {203,203},
+        walking = {201,204},
+        jumping_up_right = {202,205},
+        jumping_down_right = {200,206},
+        jumping_up = {203,207},
     }
 
     local body_sprites = {
         standing = {214,215},
         walking = {216, 217},
         hero_landing = {213},
+        lying_down = {218},
     }
 
     local function get_index_for_body(draw_info)
@@ -35,13 +37,31 @@ function new_player_animation()
     end
 
     local function get_head_offset(draw_info)
-        local x_offset = x_flip and 1 or -1
-        local y_offset = (frame > 70 or frame < 10) and -4 or -5
+        local x_offset, y_offset
+        if lying_down then
+            x_offset = x_flip and -5 or 5
+            y_offset = 2
+        else
+            x_offset = x_flip and 1 or -1
+            y_offset = (frame > 70 or frame < 10) and -4 or -5
+        end
         return {x=x_offset, y=y_offset}
     end
 
     local function get_index_for_head(draw_info)
-        if (frame > 90) or (frame < 30) then
+        -- if (frame > 90) or (frame < 30) then
+        --     return 1
+        -- else
+        --     return 2
+        -- end
+        local criterion
+        if draw_info.vel.x==0 then
+            criterion = (frame > 90) or (frame < 30)
+        else
+            criterion = (frame%30 > 22) or (frame%30 < 8)
+        end
+
+        if criterion then
             return 1
         else
             return 2
@@ -74,7 +94,10 @@ function new_player_animation()
 
         if draw_info.hero_landing then
             body_sprite_choice=body_sprites.hero_landing[1]
+        elseif draw_info.face_plant then
+            body_sprite_choice=body_sprites.lying_down[1]
         end
+        lying_down = draw_info.face_plant
         return {body=body_sprite_choice, head=head_sprite_choice}
     end
 

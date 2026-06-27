@@ -107,6 +107,7 @@ function new_character(type, color, tracked_character)
 
             -- player was to fast, do hero landing
             if vel.y > 200 then
+                player_camera.trigger_camera_shake("touchdown")
                 hero_landing_frames = 0
                 if abs(vel.x) > (max_speed - 1) then
                     face_plant = true
